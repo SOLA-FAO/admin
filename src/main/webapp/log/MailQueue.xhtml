@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:body>
+        <ui:composition template="../templates/BasicTemplate.xhtml">
+            <ui:define name="title">
+                #{msg.MAIN_MENU_MAIL_QUEUE}
+            </ui:define>
+            <ui:define name="content">
+                <f:metadata>
+                    <f:viewAction action="#{mailQueuePageBean.init()}" />
+                </f:metadata>
+                <div class="PageName">
+                    <i class="glyphicon glyphicon-envelope"></i> #{msg.MAIN_MENU_MAIL_QUEUE}
+                </div>
+                <div class="content">
+                    <h:panelGroup id="pnlEmails" layout="block">
+                        <h:commandLink>
+                            <f:ajax listener="#{mailQueuePageBean.refresh()}" 
+                                    event="click" class="BlueLink"
+                                    render=":mainForm:pnlEmails :headerForm:systemMessage" />
+                            <i class="glyphicon glyphicon-refresh"></i> #{msg.GENERAL_LABEL_REFRESH}
+                        </h:commandLink>
+                        <h:dataTable value="#{mailQueuePageBean.emails}" var="e"
+                                     class="table table-striped"
+                                     headerClass="table-header">
+                            <h:column>
+                                <f:facet name="header">#{msg.MAIL_QUEUE_PAGE_RECEPIENT}</f:facet>
+                                <span style="white-space: nowrap;">
+                                    <h:commandLink style="padding-right: 5px;"
+                                                   title="#{msg.GENERAL_LABEL_DELETE}"
+                                                   onclick="return confirm('#{msg.MAIL_QUEUE_PAGE_CONFIRM_DELETE}')">
+                                        <f:ajax listener="#{mailQueuePageBean.deleteEmail(e)}" 
+                                                event="click" onevent="handleAjax" onerror="handleAjaxError"
+                                                render=":mainForm:pnlEmails :headerForm:systemMessage" />
+                                        <i class="glyphicon glyphicon-remove"></i>
+                                    </h:commandLink>
+                                    #{e.recipientName} (#{e.recipient})
+                                </span>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.MAIL_QUEUE_PAGE_CC}</f:facet>
+                                    #{e.cc}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.MAIL_QUEUE_PAGE_BCC}</f:facet>
+                                    #{e.bcc}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.MAIL_QUEUE_PAGE_SUBJECT}</f:facet>
+                                    #{e.subject}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.MAIL_QUEUE_PAGE_BODY}</f:facet>
+                                <h:outputText escape="false" value="#{e.body}" />
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.MAIL_QUEUE_PAGE_ATTACHMENT}</f:facet>
+                                    #{e.attachmentName}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.MAIL_QUEUE_PAGE_TIME_TO_SEND}</f:facet>
+                                    #{dateBean.formatDate(e.timeToSend)}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.MAIL_QUEUE_PAGE_ATTEMPT}</f:facet>
+                                    #{e.attempt}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.MAIL_QUEUE_PAGE_ERROR}</f:facet>
+                                    <h:outputText escape="false" value="#{e.error}" />
+                            </h:column>
+                        </h:dataTable>
+                    </h:panelGroup>
+                </div>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
+

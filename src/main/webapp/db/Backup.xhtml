@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:body>
+        <ui:composition template="../templates/BasicTemplate.xhtml">
+            <ui:define name="title">
+                #{msg.MAIN_MENU_DB_BACKUP}
+            </ui:define>
+            <ui:define name="content">
+                <f:metadata>
+                    <f:viewAction action="#{dbBackupPageBean.init()}" />
+                </f:metadata>
+                <div class="PageName">
+                    <i class="glyphicon glyphicon-compressed"></i> #{msg.MAIN_MENU_DB_BACKUP}
+                </div>
+                <div class="content">
+                    <h:panelGroup id="pnlFiles" layout="block" style="width: 700px;">
+                        <a href="#" onclick="return openBackupDialog()" class="BlueLink">
+                            <i class="glyphicon glyphicon-compressed"></i> #{msg.DB_BACKUP_PAGE_MAKE_BACKUP}
+                        </a>
+                        <h:dataTable value="#{dbBackupPageBean.backups}" var="f"
+                                     class="table table-striped"
+                                     headerClass="table-header">
+                            <h:column>
+                                <f:facet name="header">#{msg.DB_BACKUP_PAGE_FILE}</f:facet>
+                                <span style="white-space: nowrap;">
+                                    <h:commandLink style="padding-right: 5px;"
+                                                   title="#{msg.GENERAL_LABEL_DELETE}"
+                                                   onclick="return confirm('#{msg.DB_BACKUP_PAGE_DELETE_CONFIRM}')">
+                                        <f:ajax listener="#{dbBackupPageBean.deleteFile(f)}" 
+                                                event="click" onevent="onDeleteFile" onerror="handleAjaxError"
+                                                render=":mainForm:pnlFiles :headerForm:systemMessage" />
+                                        <i class="glyphicon glyphicon-remove"></i>
+                                    </h:commandLink>
+                                    <a href="#" onclick="return openRestoreDialog('#{f.name}')" title="#{msg.DB_BACKUP_PAGE_RESTORE}">
+                                        <i class="glyphicon glyphicon-flash"></i>
+                                    </a>
+                                    <h:commandLink action="#{dbBackupPageBean.download(f.name)}">
+                                        #{f.name}
+                                    </h:commandLink>
+                                </span>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.DB_BACKUP_PAGE_FILE_SIZE}</f:facet>
+                                    #{dbBackupPageBean.getFileSize(f.length())}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.DB_BACKUP_PAGE_FILE_CREATION_DATE}</f:facet>
+                                    #{dbBackupPageBean.getDate(f.lastModified())}
+                            </h:column>
+                        </h:dataTable>
+                    </h:panelGroup>
+                </div>
+
+                <div style="display: none;" class="modal fade" id="backupDialog" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog" style="width:700px;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">#{msg.GENERAL_LABEL_CLOSE}</span></button>
+                                <h4 class="modal-title">#{msg.DB_BACKUP_PAGE_BACKUP}</h4>
+                            </div>
+                            <div id="backupBody" class="modal-body" style="padding: 0px 5px 0px 5px;">
+                                <h:panelGroup id="pnlBackup" layout="block" style="font-size: 12px;">
+                                    <div class="content">
+                                        <h:panelGroup class="alert alert-danger" layout="block" rendered="#{not dbBackupPageBean.utilityFolderConfigured}">
+                                            #{err.DB_BACKUP_PAGE_DB_UTILITIES_FOLDER_NOT_SET}
+                                        </h:panelGroup>
+                                        <ul id="tabs" class="nav nav-tabs">
+                                            <li class="active"><a href="#settings" data-toggle="tab">#{msg.DB_BACKUP_PAGE_CONN_SETTINGS}</a></li>
+                                            <li><a href="#log" data-toggle="tab">#{msg.DB_BACKUP_PAGE_LOG}</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div class="tab-pane active" id="settings" style="padding-top: 10px;">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.DB_BACKUP_PAGE_HOST}
+                                                        </label>
+                                                        <h:inputText value="#{dbBackupPageBean.dbHost}"  
+                                                                     class="form-control"
+                                                                     disabled="true"
+                                                                     maxlength="50" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.DB_BACKUP_PAGE_PORT}
+                                                        </label>
+                                                        <h:inputText value="#{dbBackupPageBean.dbHostPort}"
+                                                                     class="form-control" disabled="true" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.DB_BACKUP_PAGE_DB_NAME}
+                                                        </label>
+                                                        <h:inputText value="#{dbBackupPageBean.dbName}" 
+                                                                     class="form-control" disabled="true" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="splitter"></div>
+
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.DB_BACKUP_PAGE_USER} <i class="glyphicon glyphicon-required"></i>
+                                                        </label>
+                                                        <h:inputText value="#{dbBackupPageBean.dbUser}"  
+                                                                     class="form-control"
+                                                                     autocomplete="off"
+                                                                     maxlength="50" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.DB_BACKUP_PAGE_PASSWORD} <i class="glyphicon glyphicon-required"></i>
+                                                        </label>
+                                                        <h:inputSecret value="#{dbBackupPageBean.userPassword}" 
+                                                                       class="form-control" maxlength="100" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane" id="log" style="padding-top: 10px;">
+                                                <h:inputTextarea id="txtLog"
+                                                                 value="#{dbBackupPageBean.log}"  
+                                                                 class="form-control"
+                                                                 style="height: 300px;font-size: 11px;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </h:panelGroup>
+                            </div>
+                            <div class="modal-footer" style="margin-top: 0px;padding: 15px 20px 15px 20px;">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">#{msg.GENERAL_LABEL_CLOSE}</button>
+                                <h:commandButton class="btn btn-primary" id="btnBackup"
+                                                 value="#{msg.DB_BACKUP_PAGE_BACKUP}" 
+                                                 rendered="#{dbBackupPageBean.utilityFolderConfigured}">
+                                    <f:ajax event="click" execute=":mainForm:pnlBackup" 
+                                            render=":mainForm:pnlFiles :mainForm:txtLog"
+                                            onevent="onBackup"
+                                            onerror="handleAjaxBackupError"
+                                            listener="#{dbBackupPageBean.backUp()}" />
+                                </h:commandButton>
+                                <h:commandButton class="btn btn-primary" id="btnRestore" 
+                                                 value="#{msg.DB_BACKUP_PAGE_RESTORE}" 
+                                                 rendered="#{dbBackupPageBean.utilityFolderConfigured}">
+                                    <f:ajax event="click" execute=":mainForm:pnlBackup :mainForm:fileToRestore" 
+                                            render=":mainForm:pnlFiles :mainForm:txtLog"
+                                            onevent="onBackup"
+                                            onerror="handleAjaxBackupError"
+                                            listener="#{dbBackupPageBean.restore()}" />
+                                </h:commandButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h:inputHidden id="fileToRestore" value="#{dbBackupPageBean.fileToRestore}" />
+
+                <script language="javascript">
+                    var exception;
+
+                    function openRestoreDialog(fileName) {
+                        if (!confirm('#{msg.DB_BACKUP_PAGE_RESTORE_CONFIRM}')) {
+                            return false;
+                        }
+                        $('#mainForm\\:fileToRestore').val(fileName);
+                        $('#backupDialog .modal-title').text('#{msg.DB_BACKUP_PAGE_RESTORE}');
+                        $('#mainForm\\:btnBackup').hide();
+                        $('#mainForm\\:btnRestore').show();
+                        $('#backupDialog').modal('show');
+                        $('#tabs a[href="#settings"]').tab('show');
+                        $('#mainForm\\:txtLog').val('');
+                        return false;
+                    }
+
+                    function openBackupDialog() {
+                        $('#backupDialog .modal-title').text('#{msg.DB_BACKUP_PAGE_BACKUP}');
+                        $('#mainForm\\:btnBackup').show();
+                        $('#mainForm\\:btnRestore').hide();
+                        $('#backupDialog').modal('show');
+                        $('#tabs a[href="#settings"]').tab('show');
+                        $('#mainForm\\:txtLog').val('');
+                        return false;
+                    }
+
+                    function animateFiles() {
+                        $('#mainForm\\:pnlFiles').hide();
+                        $('#mainForm\\:pnlFiles').fadeIn('slow');
+                    }
+
+                    function onDeleteFile(data) {
+                        handleAjax(data);
+                        var status = data.status;
+                        switch (status) {
+                            case "success":
+                                animateFiles();
+                                break;
+                        }
+                    }
+
+                    function onBackup(data) {
+                        handleAjax(data);
+                        var status = data.status;
+                        switch (status) {
+                            case "begin":
+                                exception = "";
+                                break;
+                            case "success":
+                                if (exception === "") {
+                                    //$('#backupDialog').modal('hide');
+                                    $('#tabs a[href="#log"]').tab('show');
+                                    animateFiles();
+                                }
+                                break;
+                        }
+                    }
+
+                    function handleAjaxBackupError(data) {
+                        if (data.type !== "event") {
+                            exception = data.errorMessage;
+                            alert(data.errorMessage);
+                        }
+                    }
+                </script>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
+
