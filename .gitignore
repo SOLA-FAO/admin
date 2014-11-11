@@ -8,5 +8,18 @@
 *.war
 *.ear
 
+# Other files
+catalog.xml
+Thumbs.db
+thumbs.db
+*.pdf
+*.log
+*.jks
+
+# Subfolders
+target/
+logs/
+wsdl/
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
