@@ -3,11 +3,34 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.fao.sola.admin.web</groupId>
     <artifactId>sola-web-admin</artifactId>
-    <version>1411-SNAPSHOT</version>
+    <version>1411a-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>SOLA Web Admin</name>
+    <description>SOLA admin application, used to manage various settings of different SOLA products.</description>
+    <url>http://www.flossola.org</url>
+    <licenses>
+        <license>
+            <name>Modified BSD</name>
+            <url>http://www.flossola.org/content/licensing</url>
+        </license>
+    </licenses>
 
+    <developers>
+        <developer>
+            <name>Neil Pullar</name>
+            <email>Neil.Pullar@fao.org</email>
+            <organization>FAO</organization>
+            <organizationUrl>http://www.fao.org</organizationUrl>
+        </developer>
+    </developers>
+  
+    <scm>
+        <connection>scm:git:git@github.com:SOLA-FAO/admin.git</connection>
+        <developerConnection>scm:git:git@github.com:SOLA-FAO/admin.git</developerConnection>
+        <url>git@github.com:SOLA-FAO/admin.git</url>
+    </scm>
+    
     <properties>
         <sola.services.group.id>org.sola.services</sola.services.group.id>
         <sola.version>1402a-SNAPSHOT</sola.version>
@@ -57,7 +80,7 @@
         <dependency>
             <groupId>org.sola.opentenure.services.ejbs</groupId>
             <artifactId>sola-opentenure-claim</artifactId>
-            <version>0703a-SNAPSHOT</version>
+            <version>1403a-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>servlet-api</artifactId>
@@ -95,8 +118,91 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+    
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
