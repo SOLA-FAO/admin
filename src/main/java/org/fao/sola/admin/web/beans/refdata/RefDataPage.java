@@ -37,6 +37,7 @@ import org.sola.services.ejb.refdata.entities.GenderType;
 import org.sola.services.ejb.refdata.entities.HierarchyLevel;
 import org.sola.services.ejb.refdata.entities.IdType;
 import org.sola.services.ejb.refdata.entities.LandUseType;
+import org.sola.services.ejb.refdata.entities.MapLayerType;
 import org.sola.services.ejb.refdata.entities.MortgageType;
 import org.sola.services.ejb.refdata.entities.PanelLauncherGroup;
 import org.sola.services.ejb.refdata.entities.PartyRoleType;
@@ -195,6 +196,8 @@ public class RefDataPage extends AbstractBackingBean {
             refClass = PanelLauncherGroup.class;
         }  else if (type.equalsIgnoreCase("config_panel_launcher")){
             refClass = ConfigPanelLauncher.class;
+        } else if (type.equalsIgnoreCase("MAP_LAYER_TYPE")){
+            refClass = MapLayerType.class;
         }
 
         itemsHeader = msgProvider.getMessage(headerPrefix + type.toUpperCase() + "S");

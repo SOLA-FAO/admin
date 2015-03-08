@@ -227,4 +227,36 @@ public class ErrorKeys {
     public static final String DB_BACKUP_PAGE_FAILED_DELETE_FILE = "DB_BACKUP_PAGE_FAILED_DELETE_FILE";
     /** - File to restore was not selected. */
     public static final String DB_BACKUP_PAGE_SELECT_FILE_TO_RESTORE = "DB_BACKUP_PAGE_SELECT_FILE_TO_RESTORE";
+    
+    // CRS
+    /** - Fill in SRID. */
+    public static final String CRS_PAGE_FILL_SRID = "CRS_PAGE_FILL_SRID";
+    
+    // Query page
+    
+    /** - Fill in name */
+    public static final String QUERY_PAGE_FILL_NAME = "QUERY_PAGE_FILL_NAME";
+    /** - Fill in SQL */
+    public static final String QUERY_PAGE_FILL_SQL = "QUERY_PAGE_FILL_SQL";
+    
+    // Layers page
+    
+    /** - Fill in name */
+    public static final String LAYERS_PAGE_FILL_NAME = "LAYERS_PAGE_FILL_NAME";
+    /** - Fill in value */
+    public static final String LAYERS_PAGE_FILL_VALUE = "LAYERS_PAGE_FILL_VALUE";
+    /** - Fill in title */
+    public static final String LAYERS_PAGE_FILL_TITLE = "LAYERS_PAGE_FILL_TITLE";
+    /** - Select type */
+    public static final String LAYERS_PAGE_SELECT_TYPE = "LAYERS_PAGE_SELECT_TYPE";
+    /** - Fill in WMS layers */
+    public static final String LAYERS_PAGE_FILL_WMS_LAYERS = "LAYERS_PAGE_FILL_WMS_LAYERS";
+    /** - Fill in POJO query */
+    public static final String LAYERS_PAGE_FILL_POJO_QUERY = "LAYERS_PAGE_FILL_POJO_QUERY";
+    /** - Fill in POJO structure */
+    public static final String LAYERS_PAGE_FILL_POJO_STRUCTURE = "LAYERS_PAGE_FILL_POJO_STRUCTURE";
+    /** - Fill in style */
+    public static final String LAYERS_PAGE_FILL_STYLE = "LAYERS_PAGE_FILL_STYLE";
+    /** - Fill in shape location */
+    public static final String LAYERS_PAGE_FILL_SHAPE_LOCATION = "LAYERS_PAGE_FILL_SHAPE_LOCATION";
 }

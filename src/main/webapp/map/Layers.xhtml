@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:body>
+        <ui:composition template="../templates/BasicTemplate.xhtml">
+            <ui:define name="title">
+                #{msg.MAIN_MENU_LAYERS}
+            </ui:define>
+            <ui:define name="content">
+                <div class="PageName">
+                    #{msg.MAIN_MENU_LAYERS}
+                </div>
+                <div class="content">
+                    <h:panelGroup id="pnlCodes">
+                        <h:commandLink class="BlueLink">
+                            <f:ajax event="click" 
+                                    render= ":mainForm:pnlCode"
+                                    onevent="onOpenEditCode"
+                                    onerror="onOpenEditCodeError"
+                                    listener="#{layersPageBean.loadLayer(null)}" />
+                            <i class="glyphicon glyphicon-plus"></i> #{msg.GENERAL_LABEL_ADD}
+                        </h:commandLink>
+                        <h:dataTable value="#{layersPageBean.layers}" var="l"
+                                     class="table table-striped"
+                                     headerClass="table-header">
+                            <h:column>
+                                <f:facet name="header">#{msg.LAYERS_PAGE_NAME}</f:facet>
+                                <span style="white-space: nowrap;">
+                                    <h:commandLink style="padding-right: 5px;"
+                                                   title="#{msg.GENERAL_LABEL_DELETE}"
+                                                   onclick="return confirm('#{msg.GENERAL_CONFIRM_DELETE}')">
+                                        <f:ajax listener="#{layersPageBean.deleteLayer(l)}" 
+                                                event="click" onevent="onDeleteCode" onerror="handleAjaxError"
+                                                render=":mainForm:pnlCodes" />
+                                        <i class="glyphicon glyphicon-remove"></i>
+                                    </h:commandLink>
+                                    <h:commandLink class="BlueLink" title="#{msg.GENERAL_LABEL_EDIT}">
+                                        <f:ajax event="click" 
+                                                render= ":mainForm:pnlCode"
+                                                onevent="onOpenEditCode"
+                                                onerror="onOpenEditCodeError"
+                                                listener="#{layersPageBean.loadLayer(l.name)}" />
+                                        <i class="glyphicon glyphicon-pencil" style="padding-right: 7px;"></i>
+                                    </h:commandLink>
+                                    #{l.name}
+                                </span>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.LAYERS_PAGE_TITLE}</f:facet>
+                                    #{languageBean.getLocalizedString(l.title)}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.LAYERS_PAGE_TYPE}</f:facet>
+                                    #{layersPageBean.getLayerTypeDisplayValue(l.typeCode)}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.LAYERS_PAGE_WMS_URL}</f:facet>
+                                #{l.url}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.LAYERS_PAGE_WMS_LAYERS}</f:facet>
+                                #{l.wmsLayers}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.LAYERS_PAGE_ORDER}</f:facet>
+                                #{l.itemOrder}
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">#{msg.LAYERS_PAGE_ACTIVE}</f:facet>
+                                <ui:fragment rendered="#{l.active}">
+                                    <i class="glyphicon glyphicon-ok"></i>
+                                </ui:fragment>
+                            </h:column>
+                        </h:dataTable>
+                    </h:panelGroup>
+                </div>
+
+                <script type="text/javascript">
+                    function animateMetadataPanel() {
+                        $('#mainForm\\:pnlMetadata').hide();
+                        $('#mainForm\\:pnlMetadata').fadeIn('slow');
+                    }
+
+                    function onDeleteMetadata(data) {
+                        handleAjax(data);
+                        var status = data.status;
+                        switch (status) {
+                            case "success":
+                                animateMetadataPanel();
+                                break;
+                        }
+                    }
+                    
+                    function onOpenEditMetadata(data) {
+                        var status = data.status;
+                        switch (status) {
+                            case "begin":
+                                $('#pnlMetadataWrapper').hide();
+                                
+                                $('#metadataDialog').on('shown.bs.modal', function (event) {
+                                    var tier = $('.modal-dialog').length - 1;
+                                    $('.modal-backdrop').last().css("z-index", 1040 + tier * 30);
+                                    $('#metadataDialog')
+                                        .css("z-index", 1050 + tier * 30);
+                                  });
+                                $('#metadataDialog').modal('show');
+                                
+                                $('#waitMessage').detach().appendTo('#metadataBody');
+                                $('#waitMessage').show();
+                                break;
+                            case "success":
+                                $('#waitMessage').hide();
+                                $('#pnlMetadataWrapper').show();
+                                break;
+                        }
+                    }
+                    
+                    function onSaveMetadata(data) {
+                        handleAjax(data);
+                        var status = data.status;
+                        switch (status) {
+                            case "begin":
+                                exception = "";
+                                break;
+                            case "success":
+                                if (exception === "") {
+                                    $('#metadataDialog').modal('hide');
+                                    animateMetadataPanel();
+                                }
+                                break;
+                        }
+                    }
+                </script>
+                
+                <div style="display: none;" class="modal fade" id="codeDialog" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog" style="width:800px;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">#{msg.GENERAL_LABEL_CLOSE}</span></button>
+                                <h4 class="modal-title">#{msg.LAYERS_PAGE_LAYER}</h4>
+                            </div>
+                            <div id="codeBody" class="modal-body" style="padding: 0px 5px 0px 5px;">
+                                <div id="pnlWrapper" class="HiddenItem">
+                                    <h:panelGroup id="pnlCode" layout="block" style="font-size: 12px;">
+                                        <div class="content">
+                                            <ul class="nav nav-tabs">
+                                                <li class="active"><a href="#general" data-toggle="tab">#{msg.GENERAL_LABEL_GENERAL}</a></li>
+                                                <li><a href="#display" data-toggle="tab">#{msg.LAYERS_PAGE_DISPLAY_OPTIONS}</a></li>
+                                                <li><a href="#wms" data-toggle="tab">#{msg.LAYERS_PAGE_WMS}</a></li>
+                                                <li><a href="#pojo" data-toggle="tab">#{msg.LAYERS_PAGE_POJO}</a></li>
+                                                <li><a href="#shape" data-toggle="tab">#{msg.LAYERS_PAGE_SHAPEFILE}</a></li>
+                                                <li><a href="#metadata" data-toggle="tab">#{msg.LAYERS_PAGE_METADATA}</a></li>
+                                            </ul>
+                                            <div class="tab-content">
+                                                <div class="tab-pane active" id="general" style="padding-top: 10px;">
+                                                    <div class="row">
+                                                        <div class="col-md-3">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_NAME} <i class="glyphicon glyphicon-required"></i>
+                                                            </label>
+                                                            <h:inputText id="txtName" 
+                                                                         value="#{layersPageBean.layer.name}"  
+                                                                         class="form-control"
+                                                                         maxlength="100"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_TYPE} <i class="glyphicon glyphicon-required"></i>
+                                                            </label>
+                                                            <h:selectOneListbox id="lstLayerTypes" 
+                                                                                class="form-control"
+                                                                                size="1"
+                                                                                value="#{layersPageBean.layer.typeCode}">
+                                                                <f:selectItems value="#{layersPageBean.layerTypes}" var="t"
+                                                                               itemValue="#{t.code}" itemLabel="#{t.displayValue}" />
+                                                            </h:selectOneListbox>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_ORDER} <i class="glyphicon glyphicon-required"></i>
+                                                            </label>
+                                                            <h:inputText id="txtItemOrder" 
+                                                                         value="#{layersPageBean.layer.itemOrder}"  
+                                                                         class="form-control"
+                                                                         maxlength="3"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_ACTIVE} 
+                                                            </label>
+                                                            <br />
+                                                            <h:selectBooleanCheckbox id="chbxActive" value="#{layersPageBean.layer.active}" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="splitter"></div>
+                                                    <ui:include src="/controls/LocalizedTextBoxControl.xhtml">
+                                                        <ui:param name="required" value="true" rendererType="java.lang.Boolean" />
+                                                        <ui:param name="label" value="#{msg.LAYERS_PAGE_TITLE}" rendererType="java.lang.String" />
+                                                        <ui:param name="localizedValues" value="#{layersPageBean.localizedTitleValues.localizedValuesArray}" rendererType="org.sola.clients.web.admin.beans.localization.LocalizedValueBean[]" />
+                                                        <ui:param name="columnsNumber" value="3" rendererType="java.lang.Integer" />
+                                                    </ui:include>
+                                                </div>
+                                                
+                                                <div class="tab-pane" id="display" style="padding-top: 10px;">
+                                                    <div class="row">
+                                                        <div class="col-md-8">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_STYLE}
+                                                            </label>
+                                                            <h:inputText id="txtStyle" 
+                                                                         value="#{layersPageBean.layer.style}"  
+                                                                         class="form-control"
+                                                                         maxlength="100"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_VISIBLE}
+                                                            </label>
+                                                            <br />
+                                                            <h:selectBooleanCheckbox id="chbxVisible" value="#{layersPageBean.layer.visible}" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="splitter"></div>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_FROM_BULK}
+                                                            </label>
+                                                            <br />
+                                                            <h:selectBooleanCheckbox id="chbxFromBulk" value="#{layersPageBean.layer.addedFromBulkOperation}" />
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_FOR_PUBLIC_DISPLAY}
+                                                            </label>
+                                                            <br />
+                                                            <h:selectBooleanCheckbox id="chbxForPublicDisplay" value="#{layersPageBean.layer.useInPublicDisplay}" />
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_FOR_OT}
+                                                            </label>
+                                                            <br />
+                                                            <h:selectBooleanCheckbox id="chbxForOt" value="#{layersPageBean.layer.useForOpenTenure}" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tab-pane" id="wms" style="padding-top: 10px;">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_WMS_URL}
+                                                            </label>
+                                                            <h:inputText id="txtWmsURL" 
+                                                                         value="#{layersPageBean.layer.url}"  
+                                                                         class="form-control"
+                                                                         maxlength="500"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="splitter"></div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_WMS_LAYERS}
+                                                            </label>
+                                                            <h:inputText id="txtWmsLayers" 
+                                                                         value="#{layersPageBean.layer.wmsLayers}"  
+                                                                         class="form-control"
+                                                                         maxlength="500"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_WMS_DATA_SOURCE}
+                                                            </label>
+                                                            <h:inputText id="txtWmsDataSource" 
+                                                                         value="#{layersPageBean.layer.wmsDataSource}"  
+                                                                         class="form-control"
+                                                                         maxlength="200"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="splitter"></div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_WMS_FORMAT}
+                                                            </label>
+                                                            <h:inputText id="txtWmsFormat" 
+                                                                         value="#{layersPageBean.layer.wmsFormat}"  
+                                                                         class="form-control"
+                                                                         maxlength="15"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_WMS_VERSION}
+                                                            </label>
+                                                            <h:inputText id="txtWmsVersion" 
+                                                                         value="#{layersPageBean.layer.wmsVersion}"  
+                                                                         class="form-control"
+                                                                         maxlength="10"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="splitter"></div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_WMS_USER}
+                                                            </label>
+                                                            <h:inputText id="txtWmsUser" 
+                                                                         value="#{layersPageBean.layer.securityUser}"  
+                                                                         class="form-control"
+                                                                         maxlength="30"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_WMS_PASSWORD}
+                                                            </label>
+                                                            <h:inputText id="txtWmsPassword" 
+                                                                         value="#{layersPageBean.layer.securityPassword}"  
+                                                                         class="form-control"
+                                                                         maxlength="30"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="tab-pane" id="pojo" style="padding-top: 10px;">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_POJO_STRUCTURE}
+                                                            </label>
+                                                            <h:inputText id="txtPojoStructure" 
+                                                                         value="#{layersPageBean.layer.pojoStructure}"  
+                                                                         class="form-control"
+                                                                         maxlength="500"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="splitter"></div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_POJO_QUERY}
+                                                            </label>
+                                                            <h:selectOneListbox id="lstPojoQueries" 
+                                                                                size="1"
+                                                                                value="#{layersPageBean.layer.pojoQueryName}"
+                                                                                class="form-control">
+                                                                <f:selectItems value="#{layersPageBean.queries}" var="q"
+                                                                               itemValue="#{q.name}" itemLabel="#{q.name}" />
+                                                            </h:selectOneListbox>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_POJO_QUERY_SELECT}
+                                                            </label>
+                                                            <h:selectOneListbox id="lstPojoSelectQueries" 
+                                                                                size="1"
+                                                                                value="#{layersPageBean.layer.pojoQueryNameForSelect}"
+                                                                                class="form-control">
+                                                                <f:selectItems value="#{layersPageBean.queries}" var="q"
+                                                                               itemValue="#{q.name}" itemLabel="#{q.name}" />
+                                                            </h:selectOneListbox>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="tab-pane" id="shape" style="padding-top: 10px;">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <label>
+                                                                #{msg.LAYERS_PAGE_SHAPE_LOCATION}
+                                                            </label>
+                                                            <h:inputText id="txtShapeLocation" 
+                                                                         value="#{layersPageBean.layer.shapeLocation}"  
+                                                                         class="form-control"
+                                                                         maxlength="500"
+                                                                         autocomplete="off" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="tab-pane" id="metadata" style="padding-top: 10px;">
+                                                    <h:panelGroup id="pnlMetadataTable">
+                                                        <h:commandLink class="BlueLink">
+                                                        <f:ajax event="click" 
+                                                                render= ":mainForm:pnlMetadata"
+                                                                onevent="onOpenEditMetadata"
+                                                                onerror="onOpenEditCodeError"
+                                                                listener="#{layersPageBean.loadMetadata(null)}" />
+                                                        <i class="glyphicon glyphicon-plus"></i> #{msg.GENERAL_LABEL_ADD}
+                                                        </h:commandLink>
+                                                        <h:dataTable value="#{layersPageBean.filteredMetadata}" var="m"
+                                                                    class="table table-striped"
+                                                                    headerClass="table-header">
+                                                            <h:column>
+                                                                <f:facet name="header">#{msg.LAYERS_PAGE_NAME}</f:facet>
+                                                                <span style="white-space: nowrap;">
+                                                                    <h:commandLink style="padding-right: 5px;"
+                                                                                   title="#{msg.GENERAL_LABEL_DELETE}"
+                                                                                   onclick="return confirm('#{msg.GENERAL_CONFIRM_DELETE}')">
+                                                                        <f:ajax listener="#{layersPageBean.deleteMetadata(m)}" 
+                                                                                event="click" onevent="onDeleteMetadata" onerror="handleAjaxError"
+                                                                                render=":mainForm:pnlMetadataTable" />
+                                                                        <i class="glyphicon glyphicon-remove"></i>
+                                                                    </h:commandLink>
+                                                                    <h:commandLink class="BlueLink" title="#{msg.GENERAL_LABEL_EDIT}">
+                                                                        <f:ajax event="click" 
+                                                                                render= ":mainForm:pnlMetadata"
+                                                                                onevent="onOpenEditMetadata"
+                                                                                onerror="onOpenEditCodeError"
+                                                                                listener="#{layersPageBean.loadMetadata(m)}" />
+                                                                        <i class="glyphicon glyphicon-pencil" style="padding-right: 7px;"></i>
+                                                                    </h:commandLink>
+                                                                    #{m.name}
+                                                                </span>
+                                                            </h:column>
+                                                            <h:column>
+                                                                <f:facet name="header">#{msg.LAYERS_PAGE_VALUE}</f:facet>
+                                                                #{m.value}
+                                                            </h:column>
+                                                        </h:dataTable>
+                                                    </h:panelGroup>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </h:panelGroup>
+                                </div>
+                            </div>
+                            <div class="modal-footer" style="margin-top: 0px;padding: 15px 20px 15px 20px;">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">#{msg.GENERAL_LABEL_CLOSE}</button>
+                                <h:commandButton class="btn btn-primary" value="#{msg.GENERAL_LABEL_SAVE}">
+                                    <f:ajax event="click" execute=":mainForm:pnlCode" 
+                                            render=":mainForm:pnlCodes"
+                                            onevent="onSaveCode"
+                                            onerror="handleAjaxCodeError"
+                                            listener="#{layersPageBean.saveLayer()}" />
+                                </h:commandButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: none;" class="modal fade" id="metadataDialog" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog" style="width:500px;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">#{msg.GENERAL_LABEL_CLOSE}</span></button>
+                                <h4 class="modal-title">#{msg.LAYERS_PAGE_METADATA}</h4>
+                            </div>
+                            <div id="metadataBody" class="modal-body" style="padding: 0px 5px 0px 5px;">
+                                <div id="pnlMetadataWrapper" class="HiddenItem">
+                                    <h:panelGroup id="pnlMetadata" layout="block" style="font-size: 12px;">
+                                        <div class="content">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <label>
+                                                        #{msg.LAYERS_PAGE_NAME} <i class="glyphicon glyphicon-required"></i>
+                                                    </label>
+                                                    <h:inputText id="txtMetadataName" 
+                                                                 value="#{layersPageBean.layerMetadata.name}"  
+                                                                class="form-control"
+                                                                maxlength="50"
+                                                                autocomplete="off" />
+                                                </div>
+                                            </div>
+                                            <div class="splitter"></div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <label>
+                                                        #{msg.LAYERS_PAGE_VALUE} <i class="glyphicon glyphicon-required"></i>
+                                                    </label>
+                                                    <h:inputText id="txtMetadataValue" 
+                                                                 value="#{layersPageBean.layerMetadata.value}"  
+                                                                class="form-control"
+                                                                maxlength="100"
+                                                                autocomplete="off" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </h:panelGroup>
+                                </div>
+                            </div>
+                            <div class="modal-footer" style="margin-top: 0px;padding: 15px 20px 15px 20px;">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">#{msg.GENERAL_LABEL_CLOSE}</button>
+                                <h:commandButton class="btn btn-primary" value="#{msg.GENERAL_LABEL_SAVE}">
+                                    <f:ajax event="click" execute=":mainForm:pnlMetadata" 
+                                            render=":mainForm:pnlMetadataTable"
+                                            onevent="onSaveMetadata"
+                                            onerror="handleAjaxCodeError"
+                                            listener="#{layersPageBean.saveMetadata()}" />
+                                </h:commandButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script type="text/javascript" src="#{request.contextPath}/js/entityPopUp.js"></script>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
+
