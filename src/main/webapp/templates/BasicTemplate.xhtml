@@ -33,7 +33,7 @@
         </f:verbatim>
     </h:head>
     <h:body>
-        <f:view locale="en_US" />
+        <f:view locale="#{languageBean.localeCodeForBundle}" />
         <div id="waitMessage" class="waitMessage"> 
             <h:graphicImage name="images/busy.gif" style="vertical-align: middle;" library="default" /> 
             #{msg.GENERAL_LABEL_WAIT}
