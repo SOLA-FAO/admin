@@ -14,6 +14,7 @@ import org.fao.sola.admin.web.beans.helpers.ErrorKeys;
 import org.fao.sola.admin.web.beans.helpers.MessageProvider;
 import org.fao.sola.admin.web.beans.helpers.MessagesKeys;
 import org.fao.sola.admin.web.beans.language.LanguageBean;
+import org.fao.sola.admin.web.beans.localization.LocalizedValuesListBean;
 import org.sola.common.StringUtility;
 import org.sola.common.mapping.MappingManager;
 import org.sola.opentenure.services.ejbs.claim.businesslogic.ClaimEJBLocal;
@@ -36,9 +37,6 @@ import org.sola.services.ejb.refdata.entities.FieldType;
 public class FormsPageBean extends AbstractBackingBean {
 
     @Inject
-    LanguageBean langBean;
-
-    @Inject
     MessageProvider msgProvider;
 
     @EJB
@@ -47,6 +45,9 @@ public class FormsPageBean extends AbstractBackingBean {
     @EJB
     ClaimEJBLocal claimEjb;
 
+    @Inject
+    private LanguageBean languageBean;
+    
     private FormTemplate formTemplate;
     private SectionTemplate tmpSection;
     private FieldTemplate tmpField;
@@ -55,6 +56,14 @@ public class FormsPageBean extends AbstractBackingBean {
     private FieldType[] fieldTypes;
     private FieldConstraintType[] constraintTypes;
     private String message;
+    private LocalizedValuesListBean localizedFormDisplayNames;
+    private LocalizedValuesListBean localizedSectionError;
+    private LocalizedValuesListBean localizedSectionDisplayNames;
+    private LocalizedValuesListBean localizedSectionElementNames;
+    private LocalizedValuesListBean localizedFieldNames;
+    private LocalizedValuesListBean localizedConstraintNames;
+    private LocalizedValuesListBean localizedConstraintsError;
+    private LocalizedValuesListBean localizedOptionNames;
     
     public FormTemplate getFormTemplate() {
         return formTemplate;
@@ -92,14 +101,46 @@ public class FormsPageBean extends AbstractBackingBean {
         return constraintTypes;
     }
 
+    public LocalizedValuesListBean getLocalizedFormDisplayNames() {
+        return localizedFormDisplayNames;
+    }
+    
+    public LocalizedValuesListBean getLocalizedSectionError(){
+        return localizedSectionError;
+    }
+    
+    public LocalizedValuesListBean getLocalizedSectionDisplayNames(){
+        return localizedSectionDisplayNames;
+    }
+    
+    public LocalizedValuesListBean getLocalizedSectionElementNames(){
+        return localizedSectionElementNames;
+    }
+
+    public LocalizedValuesListBean getLocalizedFieldNames() {
+        return localizedFieldNames;
+    }
+
+    public LocalizedValuesListBean getLocalizedConstraintNames() {
+        return localizedConstraintNames;
+    }
+
+    public LocalizedValuesListBean getLocalizedConstraintsError() {
+        return localizedConstraintsError;
+    }
+
+    public LocalizedValuesListBean getLocalizedOptionNames() {
+        return localizedOptionNames;
+    }
+    
     public FormsPageBean() {
     }
 
     @PostConstruct
     private void init() {
         // Load lists
-        List<FieldType> fieldTypesList = refEjb.getCodeEntityList(FieldType.class, langBean.getLocale());
-        List<FieldConstraintType> constraintTypesList = refEjb.getCodeEntityList(FieldConstraintType.class, langBean.getLocale());
+        List<FieldType> fieldTypesList = MappingManager.getMapper().map(refEjb.getCodeEntityList(FieldType.class, languageBean.getLocale()), List.class);
+        List<FieldConstraintType> constraintTypesList = MappingManager.getMapper().map(refEjb.getCodeEntityList(FieldConstraintType.class, languageBean.getLocale()), List.class);
         
         if(fieldTypesList != null){
             FieldType dummy = new FieldType();
@@ -131,7 +172,7 @@ public class FormsPageBean extends AbstractBackingBean {
         if (formTemplate == null) {
             formTemplate = new FormTemplate();
         }
-        
+      
         // Init tmp variables
         tmpSection = new SectionTemplate();
         tmpField = new FieldTemplate();
@@ -139,6 +180,12 @@ public class FormsPageBean extends AbstractBackingBean {
         tmpOption = new FieldConstraintOption();
     }
 
+    public void loadForm() {
+        // Load localized values
+        localizedFormDisplayNames = new LocalizedValuesListBean(languageBean);
+        localizedFormDisplayNames.loadLocalizedValues(formTemplate.getDisplayName());
+    }
+    
     public SectionTemplate[] getSections() {
         if (formTemplate == null) {
             return null;
@@ -162,9 +209,12 @@ public class FormsPageBean extends AbstractBackingBean {
         if (StringUtility.isEmpty(formTemplate.getName())) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_NAME) + "\r\n";
         }
-        if (StringUtility.isEmpty(formTemplate.getDisplayName())) {
+        if (!localizedFormDisplayNames.hasValues()) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_DISPLAY_NAME);
         }
+        
+        formTemplate.setDisplayName(localizedFormDisplayNames.buildMultilingualString());
+        
         if (!errors.equals("")) {
             throw new Exception(errors);
         }
@@ -179,6 +229,15 @@ public class FormsPageBean extends AbstractBackingBean {
         } else {
             tmpSection = MappingManager.getMapper().map(sec, SectionTemplate.class);
         }
+        
+        localizedSectionError = new LocalizedValuesListBean(languageBean);
+        localizedSectionError.loadLocalizedValues(tmpSection.getErrorMsg());
+        
+        localizedSectionDisplayNames = new LocalizedValuesListBean(languageBean);
+        localizedSectionDisplayNames.loadLocalizedValues(tmpSection.getDisplayName());
+        
+        localizedSectionElementNames = new LocalizedValuesListBean(languageBean);
+        localizedSectionElementNames.loadLocalizedValues(tmpSection.getElementDisplayName());
     }
 
     public void deleteSection(SectionTemplate sec) {
@@ -210,16 +269,16 @@ public class FormsPageBean extends AbstractBackingBean {
         if (StringUtility.isEmpty(tmpSection.getName())) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_NAME) + "\r\n";
         }
-        if (StringUtility.isEmpty(tmpSection.getDisplayName())) {
+        if (!localizedSectionDisplayNames.hasValues()) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_DISPLAY_NAME) + "\r\n";
         }
         if (StringUtility.isEmpty(tmpSection.getElementName())) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_ELEMENT_NAME) + "\r\n";
         }
-        if (StringUtility.isEmpty(tmpSection.getElementDisplayName())) {
+        if (!localizedSectionElementNames.hasValues()) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_ELEMENT_DISPLAY_NAME) + "\r\n";
         }
-        if (StringUtility.isEmpty(tmpSection.getErrorMsg())) {
+        if (!localizedSectionError.hasValues()) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_ERROR_MESSAGE) + "\r\n";
         }
         if (tmpSection.getMinOccurrences() > tmpSection.getMaxOccurrences()) {
@@ -229,6 +288,10 @@ public class FormsPageBean extends AbstractBackingBean {
             throw new Exception(errors);
         }
 
+        tmpSection.setErrorMsg(localizedSectionError.buildMultilingualString());
+        tmpSection.setDisplayName(localizedSectionDisplayNames.buildMultilingualString());
+        tmpSection.setElementDisplayName(localizedSectionElementNames.buildMultilingualString());
+        
         if (formTemplate.getSectionTemplateList() != null) {
             // Check if section already exists
             for (SectionTemplate templ : formTemplate.getSectionTemplateList()) {
@@ -268,6 +331,8 @@ public class FormsPageBean extends AbstractBackingBean {
         } else {
             tmpField = MappingManager.getMapper().map(fTmpl, FieldTemplate.class);
         }
+        localizedFieldNames = new LocalizedValuesListBean(languageBean);
+        localizedFieldNames.loadLocalizedValues(tmpField.getDisplayName());
     }
 
     public void deleteField(FieldTemplate fTmpl, SectionTemplate sec) {
@@ -299,7 +364,7 @@ public class FormsPageBean extends AbstractBackingBean {
         if (StringUtility.isEmpty(tmpField.getName())) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_NAME) + "\r\n";
         }
-        if (StringUtility.isEmpty(tmpField.getDisplayName())) {
+        if (!localizedFieldNames.hasValues()) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_DISPLAY_NAME) + "\r\n";
         }
         if (StringUtility.isEmpty(tmpField.getHint())) {
@@ -309,6 +374,8 @@ public class FormsPageBean extends AbstractBackingBean {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_SELECT_FIELD_TYPE) + "\r\n";
         }
 
+        tmpField.setDisplayName(localizedFieldNames.buildMultilingualString());
+        
         if (!errors.equals("")) {
             throw new Exception(errors);
         }
@@ -358,6 +425,10 @@ public class FormsPageBean extends AbstractBackingBean {
         } else {
             tmpConstraint = MappingManager.getMapper().map(fConstr, FieldConstraint.class);
         }
+        localizedConstraintNames = new LocalizedValuesListBean(languageBean);
+        localizedConstraintNames.loadLocalizedValues(tmpConstraint.getDisplayName());
+        localizedConstraintsError = new LocalizedValuesListBean(languageBean);
+        localizedConstraintsError.loadLocalizedValues(tmpConstraint.getErrorMsg());
     }
 
     public void deleteConstraint(FieldConstraint fConstr, FieldTemplate fTmpl) {
@@ -389,10 +460,10 @@ public class FormsPageBean extends AbstractBackingBean {
         if (StringUtility.isEmpty(tmpConstraint.getName())) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_NAME) + "\r\n";
         }
-        if (StringUtility.isEmpty(tmpConstraint.getDisplayName())) {
+        if (!localizedConstraintNames.hasValues()) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_DISPLAY_NAME) + "\r\n";
         }
-        if (StringUtility.isEmpty(tmpConstraint.getErrorMsg())) {
+        if (!localizedConstraintsError.hasValues()) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_ERROR_MESSAGE) + "\r\n";
         }
         if (StringUtility.isEmpty(tmpConstraint.getFieldConstraintType())) {
@@ -403,6 +474,9 @@ public class FormsPageBean extends AbstractBackingBean {
             throw new Exception(errors);
         }
 
+        tmpConstraint.setDisplayName(localizedConstraintNames.buildMultilingualString());
+        tmpConstraint.setErrorMsg(localizedConstraintsError.buildMultilingualString());
+        
         if (formTemplate.getSectionTemplateList() != null) {
             // Loop through sections 
             for (SectionTemplate secTmpl : formTemplate.getSectionTemplateList()) {
@@ -455,6 +529,8 @@ public class FormsPageBean extends AbstractBackingBean {
         } else {
             tmpOption = MappingManager.getMapper().map(option, FieldConstraintOption.class);
         }
+        localizedOptionNames = new LocalizedValuesListBean(languageBean);
+        localizedOptionNames.loadLocalizedValues(tmpOption.getDisplayName());
     }
 
     public void deleteOption(FieldConstraintOption option, FieldConstraint fConstr) {
@@ -486,7 +562,7 @@ public class FormsPageBean extends AbstractBackingBean {
         if (StringUtility.isEmpty(tmpOption.getName())) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_NAME) + "\r\n";
         }
-        if (StringUtility.isEmpty(tmpOption.getDisplayName())) {
+        if (!localizedOptionNames.hasValues()) {
             errors += msgProvider.getErrorMessage(ErrorKeys.FORMS_PAGE_FILL_DISPLAY_NAME) + "\r\n";
         }
 
@@ -494,6 +570,8 @@ public class FormsPageBean extends AbstractBackingBean {
             throw new Exception(errors);
         }
 
+        tmpOption.setDisplayName(localizedOptionNames.buildMultilingualString());
+        
         if (formTemplate.getSectionTemplateList() == null) {
             return;
         }
@@ -566,7 +644,7 @@ public class FormsPageBean extends AbstractBackingBean {
                 LogUtility.log(msgProvider.getMessage(ErrorKeys.GENERAL_REDIRECT_FAILED), e);
             }
         } catch (Exception e) {
-            getContext().addMessage(null, new FacesMessage(processException(e, langBean.getLocale()).getMessage()));
+            getContext().addMessage(null, new FacesMessage(processException(e, languageBean.getLocale()).getMessage()));
         }
     }
 }

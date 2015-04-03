@@ -92,9 +92,14 @@
                                 </div>
                                 <div class="innerPanelWithBorder">
                                     <div class="panelTools">
-                                        <h:link class="BlueLink" onclick="return showFormHeaderDialog()">
-                                            <i class="glyphicon glyphicon-pencil" style="margin-right: 5px;"></i>#{msg.GENERAL_LABEL_EDIT}
-                                        </h:link>
+                                        <h:commandLink class="BlueLink">
+                                            <f:ajax event="click" 
+                                                    render= ":mainForm:pnlForm"
+                                                    onevent="onOpenEditForm"
+                                                    onerror="onOpenEditFormError"
+                                                    listener="#{formsPageBean.loadForm()}" />
+                                            <i class="glyphicon glyphicon-pencil"></i> #{msg.GENERAL_LABEL_EDIT}
+                                        </h:commandLink>
                                     </div>
                                     <h:panelGroup id="formHeader">
                                         <table class="tableItem" width="500">
@@ -458,49 +463,55 @@
                     </table>
                 </div>
 
-                <div class="modal fade" id="formDialog" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel">
-                    <div class="modal-dialog">
+                <div style="display: none;" class="modal fade" id="formDialog" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog" style="width:700px;">
                         <div class="modal-content">
+
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">#{msg.GENERAL_LABEL_CLOSE}</span></button>
                                 <h4 class="modal-title" id="myModalLabel">#{msg.FORMS_PAGE_FORM}</h4>
                             </div>
+
                             <div class="modal-body" id="formBody">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <label>
-                                            #{msg.FORMS_PAGE_NAME} <i class="glyphicon glyphicon-required"></i>
-                                        </label>
-                                        <br />
-                                        <h:inputText value="#{formsPageBean.formTemplate.name}" 
-                                                     id="txtFormName"
-                                                     maxlength="255"
-                                                     disabled="#{not formsPageBean.formTemplate.isNew()}"
-                                                     class="form-control" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>
-                                            #{msg.FORMS_PAGE_DISPLAY_NAME} <i class="glyphicon glyphicon-required"></i>
-                                        </label>
-                                        <br />
-                                        <h:inputText value="#{formsPageBean.formTemplate.displayName}" 
-                                                     id="txtFormDisplayName"
-                                                     maxlength="255"
-                                                     class="form-control" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>
-                                            #{msg.FORMS_PAGE_DEFAULT}
-                                        </label>
-                                        <br />
-                                        <h:selectBooleanCheckbox id="chbxFormDefault" value="#{formsPageBean.formTemplate.isDefault}" />
-                                    </div>
+                                <div id="pnlWrapper_form" class="HiddenItem">
+                                    <h:panelGroup id="pnlForm" layout="block">
+                                        <div class="row">
+                                            <div class="col-md-9">
+                                                <label>
+                                                    #{msg.FORMS_PAGE_NAME} <i class="glyphicon glyphicon-required"></i>
+                                                </label>
+                                                <br />
+                                                <h:inputText value="#{formsPageBean.formTemplate.name}" 
+                                                             id="txtFormName"
+                                                             maxlength="255"
+                                                             disabled="#{not formsPageBean.formTemplate.isNew()}"
+                                                             class="form-control" onkeypress="return limitSpecialKeys(event)" />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>
+                                                    #{msg.FORMS_PAGE_DEFAULT}
+                                                </label>
+                                                <br />
+                                                <h:selectBooleanCheckbox id="chbxFormDefault" value="#{formsPageBean.formTemplate.isDefault}" />
+                                            </div>
+                                        </div>
+
+                                        <div class="splitter"></div>
+
+                                        <ui:include src="/controls/LocalizedTextBoxControl.xhtml">
+                                            <ui:param name="required" value="true" rendererType="java.lang.Boolean" />
+                                            <ui:param name="label" value="#{msg.FORMS_PAGE_DISPLAY_NAME}" rendererType="java.lang.String" />
+                                            <ui:param name="localizedValues" value="#{formsPageBean.localizedFormDisplayNames.localizedValuesArray}" rendererType="org.sola.clients.web.admin.beans.localization.LocalizedValueBean[]" />
+                                            <ui:param name="columnsNumber" value="2" rendererType="java.lang.Integer" />
+                                        </ui:include>
+                                    </h:panelGroup>
                                 </div>
                             </div>
+                            
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">#{msg.GENERAL_LABEL_CLOSE}</button>
                                 <h:commandButton class="btn btn-primary" value="#{msg.GENERAL_LABEL_SAVE}">
-                                    <f:ajax event="click" execute="txtFormName txtFormDisplayName chbxFormDefault" 
+                                    <f:ajax event="click" execute=":mainForm:pnlForm" 
                                             render=":mainForm:formHeader"
                                             onevent="onSaveFormHeader"
                                             onerror="handleFormHeaderSaveError"
@@ -510,7 +521,7 @@
                         </div>
                     </div>
                 </div>
-
+           
                 <div style="display: none;" class="modal fade" id="sectionDialog" tabindex="-1" role="dialog" aria-hidden="true">
                     <div class="modal-dialog" style="width:700px;">
                         <div class="modal-content">
@@ -523,86 +534,90 @@
                             <div class="modal-body" id="sectionBody">
                                 <div id="pnlWrapper_section" class="HiddenItem">
                                     <h:panelGroup id="pnlSectionRecord" layout="block">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_NAME} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpSection.name}" 
-                                                             id="txtSectionName"
-                                                             maxlength="255"
-                                                             class="form-control" />
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_DISPLAY_NAME} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpSection.displayName}" 
-                                                             id="txtSectionDisplayName"
-                                                             maxlength="255"
-                                                             class="form-control" />
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_ELEMENT_NAME} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpSection.elementName}" 
-                                                             id="txtElementName"
-                                                             maxlength="255"
-                                                             class="form-control" />
-                                            </div>
-                                        </div>
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a href="#sectionGeneral" data-toggle="tab">#{msg.GENERAL_LABEL_GENERAL}</a></li>
+                                            <li><a href="#sectionElement" data-toggle="tab"><i class="glyphicon glyphicon-required"></i> #{msg.FORMS_PAGE_ELEMENT}</a></li>
+                                            <li><a href="#sectionError" data-toggle="tab"><i class="glyphicon glyphicon-required"></i> #{msg.FORMS_PAGE_ERROR_MSG}</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div class="tab-pane active" id="sectionGeneral" style="padding-top: 10px;">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.FORMS_PAGE_NAME} <i class="glyphicon glyphicon-required"></i>
+                                                        </label>
+                                                        <br />
+                                                        <h:inputText value="#{formsPageBean.tmpSection.name}" 
+                                                                     id="txtSectionName"
+                                                                     maxlength="255"
+                                                                     onkeypress="return limitSpecialKeys(event)"
+                                                                     class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.FORMS_PAGE_MIN_OCCURRENCE} <i class="glyphicon glyphicon-required"></i>
+                                                        </label>
+                                                        <br />
+                                                        <h:inputText value="#{formsPageBean.tmpSection.minOccurrences}" 
+                                                                     id="txtSectionMinOccurrence"
+                                                                     maxlength="255"
+                                                                     class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.FORMS_PAGE_MAX_OCCURRENCE} <i class="glyphicon glyphicon-required"></i>
+                                                        </label>
+                                                        <br />
+                                                        <h:inputText value="#{formsPageBean.tmpSection.maxOccurrences}" 
+                                                                     id="txtSectionMaxOccurrence"
+                                                                     maxlength="255"
+                                                                     class="form-control" />
+                                                    </div>
+                                                </div>
 
-                                        <div class="splitter"></div>
+                                                <div class="splitter"></div>
 
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_ELEMENT_DISPLAY_NAME} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpSection.elementDisplayName}" 
-                                                             id="txtElementDisplayName"
-                                                             maxlength="255"
-                                                             class="form-control" />
+                                                <ui:include src="/controls/LocalizedTextBoxControl.xhtml">
+                                                    <ui:param name="required" value="true" rendererType="java.lang.Boolean" />
+                                                    <ui:param name="label" value="#{msg.FORMS_PAGE_DISPLAY_NAME}" rendererType="java.lang.String" />
+                                                    <ui:param name="localizedValues" value="#{formsPageBean.localizedSectionDisplayNames.localizedValuesArray}" rendererType="org.sola.clients.web.admin.beans.localization.LocalizedValueBean[]" />
+                                                    <ui:param name="columnsNumber" value="3" rendererType="java.lang.Integer" />
+                                                </ui:include>
+                                                
                                             </div>
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_MIN_OCCURRENCE} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpSection.minOccurrences}" 
-                                                             id="txtSectionMinOccurrence"
-                                                             maxlength="255"
-                                                             class="form-control" />
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_MAX_OCCURRENCE} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpSection.maxOccurrences}" 
-                                                             id="txtSectionMaxOccurrence"
-                                                             maxlength="255"
-                                                             class="form-control" />
-                                            </div>
-                                        </div>
+                                            
+                                            <div class="tab-pane" id="sectionElement" style="padding-top: 10px;">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <label>
+                                                            #{msg.FORMS_PAGE_ELEMENT_NAME} <i class="glyphicon glyphicon-required"></i>
+                                                        </label>
+                                                        <br />
+                                                        <h:inputText value="#{formsPageBean.tmpSection.elementName}" 
+                                                                     id="txtElementName"
+                                                                     maxlength="255"
+                                                                     onkeypress="return limitSpecialKeys(event)"
+                                                                     class="form-control" />
+                                                    </div>
+                                                </div>
 
-                                        <div class="splitter"></div>
-
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_ERROR_MSG} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputTextarea value="#{formsPageBean.tmpSection.errorMsg}" 
-                                                                 id="txtSectionErrorMsg"
-                                                                 rows="2"
-                                                                 class="form-control" />
+                                                <div class="splitter"></div>
+                                                
+                                                <ui:include src="/controls/LocalizedTextBoxControl.xhtml">
+                                                    <ui:param name="required" value="true" rendererType="java.lang.Boolean" />
+                                                    <ui:param name="label" value="#{msg.FORMS_PAGE_ELEMENT_DISPLAY_NAME}" rendererType="java.lang.String" />
+                                                    <ui:param name="localizedValues" value="#{formsPageBean.localizedSectionElementNames.localizedValuesArray}" rendererType="org.sola.clients.web.admin.beans.localization.LocalizedValueBean[]" />
+                                                    <ui:param name="columnsNumber" value="3" rendererType="java.lang.Integer" />
+                                                </ui:include>
+                                            </div>
+                                            
+                                            <div class="tab-pane" id="sectionError" style="padding-top: 10px;">
+                                                <ui:include src="/controls/LocalizedTextBoxControl.xhtml">
+                                                    <ui:param name="required" value="true" rendererType="java.lang.Boolean" />
+                                                    <ui:param name="label" value="#{msg.FORMS_PAGE_ERROR_MSG}" rendererType="java.lang.String" />
+                                                    <ui:param name="localizedValues" value="#{formsPageBean.localizedSectionError.localizedValuesArray}" rendererType="org.sola.clients.web.admin.beans.localization.LocalizedValueBean[]" />
+                                                    <ui:param name="columnsNumber" value="1" rendererType="java.lang.Integer" />
+                                                </ui:include>
                                             </div>
                                         </div>
                                     </h:panelGroup>
@@ -636,7 +651,7 @@
                                 <div id="pnlWrapper_field" class="HiddenItem">
                                     <h:panelGroup id="pnlFieldRecord" layout="block">
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <label>
                                                     #{msg.FORMS_PAGE_NAME} <i class="glyphicon glyphicon-required"></i>
                                                 </label>
@@ -644,31 +659,7 @@
                                                 <h:inputText value="#{formsPageBean.tmpField.name}" 
                                                              id="txtFieldName"
                                                              maxlength="255"
-                                                             class="form-control" />
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_DISPLAY_NAME} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpField.displayName}" 
-                                                             id="txtFieldDisplayName"
-                                                             maxlength="255"
-                                                             class="form-control" />
-                                            </div>
-                                        </div>
-
-                                        <div class="splitter"></div>
-
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_HINT} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpField.hint}" 
-                                                             id="txtFieldHint"
-                                                             maxlength="255"
+                                                             onkeypress="return limitSpecialKeys(event)"
                                                              class="form-control" />
                                             </div>
                                             <div class="col-md-4">
@@ -686,7 +677,26 @@
                                                                    itemValue="#{ft.code}" />
                                                 </h:selectOneListbox>
                                             </div>
+                                            <div class="col-md-4">
+                                                <label>
+                                                    #{msg.FORMS_PAGE_HINT} <i class="glyphicon glyphicon-required"></i>
+                                                </label>
+                                                <br />
+                                                <h:inputText value="#{formsPageBean.tmpField.hint}" 
+                                                             id="txtFieldHint"
+                                                             maxlength="255"
+                                                             class="form-control" />
+                                            </div>
                                         </div>
+
+                                        <div class="splitter"></div>
+
+                                        <ui:include src="/controls/LocalizedTextBoxControl.xhtml">
+                                            <ui:param name="required" value="true" rendererType="java.lang.Boolean" />
+                                            <ui:param name="label" value="#{msg.FORMS_PAGE_DISPLAY_NAME}" rendererType="java.lang.String" />
+                                            <ui:param name="localizedValues" value="#{formsPageBean.localizedFieldNames.localizedValuesArray}" rendererType="org.sola.clients.web.admin.beans.localization.LocalizedValueBean[]" />
+                                            <ui:param name="columnsNumber" value="3" rendererType="java.lang.Integer" />
+                                        </ui:include>
                                     </h:panelGroup>
                                 </div>
                             </div>
@@ -717,91 +727,93 @@
                             <div class="modal-body" id="constraintBody">
                                 <div id="pnlWrapper_constraint" class="HiddenItem">
                                     <h:panelGroup id="pnlConstraintRecord" layout="block">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_NAME} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpConstraint.name}" 
-                                                             id="txtConstraintName"
-                                                             maxlength="255"
-                                                             class="form-control" />
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_DISPLAY_NAME} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpConstraint.displayName}" 
-                                                             id="txtConstraintDisplayName"
-                                                             maxlength="255"
-                                                             class="form-control" />
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_CONSTRAINT_TYPE} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:selectOneListbox
-                                                    id="cbxConstraintType" 
-                                                    size="1"
-                                                    value="#{formsPageBean.tmpConstraint.fieldConstraintType}"
-                                                    class="form-control">
-                                                    <f:selectItems value="#{formsPageBean.constraintTypes}" var="ct"
-                                                                   itemLabel="#{ct.displayValue}" 
-                                                                   itemValue="#{ct.code}" />
-                                                </h:selectOneListbox>
-                                            </div>
-                                        </div>
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a href="#constrGeneral" data-toggle="tab">#{msg.GENERAL_LABEL_GENERAL}</a></li>
+                                            <li><a href="#constrError" data-toggle="tab"><i class="glyphicon glyphicon-required"></i> #{msg.FORMS_PAGE_ERROR_MSG}</a></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div class="tab-pane active" id="constrGeneral" style="padding-top: 10px;">
+                                                 <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label>
+                                                            #{msg.FORMS_PAGE_NAME} <i class="glyphicon glyphicon-required"></i>
+                                                        </label>
+                                                        <br />
+                                                        <h:inputText value="#{formsPageBean.tmpConstraint.name}" 
+                                                                     id="txtConstraintName"
+                                                                     maxlength="255"
+                                                                     onkeypress="return limitSpecialKeys(event)"
+                                                                     class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label>
+                                                            #{msg.FORMS_PAGE_CONSTRAINT_TYPE} <i class="glyphicon glyphicon-required"></i>
+                                                        </label>
+                                                        <br />
+                                                        <h:selectOneListbox
+                                                            id="cbxConstraintType" 
+                                                            size="1"
+                                                            value="#{formsPageBean.tmpConstraint.fieldConstraintType}"
+                                                            class="form-control">
+                                                            <f:selectItems value="#{formsPageBean.constraintTypes}" var="ct"
+                                                                           itemLabel="#{ct.displayValue}" 
+                                                                           itemValue="#{ct.code}" />
+                                                        </h:selectOneListbox>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="splitter"></div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.FORMS_PAGE_FORMAT}
+                                                        </label>
+                                                        <br />
+                                                        <h:inputText value="#{formsPageBean.tmpConstraint.format}" 
+                                                                     id="txtConstraintFormat"
+                                                                     maxlength="255"
+                                                                     class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.FORMS_PAGE_MIN_VAL}
+                                                        </label>
+                                                        <br />
+                                                        <h:inputText value="#{formsPageBean.tmpConstraint.minValue}" 
+                                                                     id="txtConstraintMinValue"
+                                                                     maxlength="10"
+                                                                     class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>
+                                                            #{msg.FORMS_PAGE_MAX_VAL}
+                                                        </label>
+                                                        <br />
+                                                        <h:inputText value="#{formsPageBean.tmpConstraint.maxValue}" 
+                                                                     id="txtConstraintMaxValue"
+                                                                     maxlength="10"
+                                                                     class="form-control" />
+                                                    </div>
+                                                </div>
 
-                                        <div class="splitter"></div>
-
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_FORMAT}
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpConstraint.format}" 
-                                                             id="txtConstraintFormat"
-                                                             maxlength="255"
-                                                             class="form-control" />
+                                                <div class="splitter"></div>
+                                                
+                                                <ui:include src="/controls/LocalizedTextBoxControl.xhtml">
+                                                    <ui:param name="required" value="true" rendererType="java.lang.Boolean" />
+                                                    <ui:param name="label" value="#{msg.FORMS_PAGE_DISPLAY_NAME}" rendererType="java.lang.String" />
+                                                    <ui:param name="localizedValues" value="#{formsPageBean.localizedConstraintNames.localizedValuesArray}" rendererType="org.sola.clients.web.admin.beans.localization.LocalizedValueBean[]" />
+                                                    <ui:param name="columnsNumber" value="3" rendererType="java.lang.Integer" />
+                                                </ui:include>
+                                                
                                             </div>
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_MIN_VAL}
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpConstraint.minValue}" 
-                                                             id="txtConstraintMinValue"
-                                                             maxlength="10"
-                                                             class="form-control" />
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_MAX_VAL}
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpConstraint.maxValue}" 
-                                                             id="txtConstraintMaxValue"
-                                                             maxlength="10"
-                                                             class="form-control" />
-                                            </div>
-                                        </div>
-
-                                        <div class="splitter"></div>
-
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_ERROR_MSG} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputTextarea value="#{formsPageBean.tmpConstraint.errorMsg}" 
-                                                                 id="txtConstraintErrorMsg"
-                                                                 rows="2"
-                                                                 class="form-control" />
+                                            <div class="tab-pane" id="constrError" style="padding-top: 10px;">
+                                                <ui:include src="/controls/LocalizedTextBoxControl.xhtml">
+                                                    <ui:param name="required" value="true" rendererType="java.lang.Boolean" />
+                                                    <ui:param name="label" value="#{msg.FORMS_PAGE_ERROR_MSG}" rendererType="java.lang.String" />
+                                                    <ui:param name="localizedValues" value="#{formsPageBean.localizedConstraintsError.localizedValuesArray}" rendererType="org.sola.clients.web.admin.beans.localization.LocalizedValueBean[]" />
+                                                    <ui:param name="columnsNumber" value="1" rendererType="java.lang.Integer" />
+                                                </ui:include>
                                             </div>
                                         </div>
                                     </h:panelGroup>
@@ -823,7 +835,7 @@
                 </div>
 
                 <div style="display: none;" class="modal fade" id="optionDialog" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog" style="width:500px;">
+                    <div class="modal-dialog" style="width:700px;">
                         <div class="modal-content">
 
                             <div class="modal-header">
@@ -843,24 +855,20 @@
                                                 <h:inputText value="#{formsPageBean.tmpOption.name}" 
                                                              id="txtOptionName"
                                                              maxlength="255"
+                                                             onkeypress="return limitSpecialKeys(event)"
                                                              class="form-control" />
                                             </div>
                                         </div>
 
                                         <div class="splitter"></div>
 
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <label>
-                                                    #{msg.FORMS_PAGE_DISPLAY_NAME} <i class="glyphicon glyphicon-required"></i>
-                                                </label>
-                                                <br />
-                                                <h:inputText value="#{formsPageBean.tmpOption.displayName}" 
-                                                             id="txtOptionDisplayName"
-                                                             maxlength="255"
-                                                             class="form-control" />
-                                            </div>
-                                        </div>
+                                        <ui:include src="/controls/LocalizedTextBoxControl.xhtml">
+                                            <ui:param name="required" value="true" rendererType="java.lang.Boolean" />
+                                            <ui:param name="label" value="#{msg.FORMS_PAGE_DISPLAY_NAME}" rendererType="java.lang.String" />
+                                            <ui:param name="localizedValues" value="#{formsPageBean.localizedOptionNames.localizedValuesArray}" rendererType="org.sola.clients.web.admin.beans.localization.LocalizedValueBean[]" />
+                                            <ui:param name="columnsNumber" value="3" rendererType="java.lang.Integer" />
+                                        </ui:include>
+                                        
                                     </h:panelGroup>
                                 </div>
                             </div>

@@ -42,8 +42,20 @@ function onOpenEditRec(data, typeName) {
     }
 }
 
-// Sections
+// Forms
 var exception_section;
+function onOpenEditForm(data) {
+    onOpenEditRec(data, 'form');
+}
+
+function onOpenEditFormError(data) {
+    if (data.type !== "event") {
+        $('#waitMessage').hide();
+        alert(data.name);
+    }
+}
+
+// Sections
 function onOpenEditSection(data) {
     onOpenEditRec(data, 'section');
 }

@@ -34,7 +34,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.fao.sola.admin.web.beans.helpers.ErrorKeys;
 import org.fao.sola.admin.web.beans.language.LanguageBean;
+import org.sola.common.StringUtility;
 import org.sola.services.ejb.refdata.entities.Language;
 
 /**
@@ -91,6 +93,15 @@ public class LocalizedValuesListBean {
         }
     }
 
+    /**
+     * Returns true if localized values were provided, otherwise false.
+     * @return 
+     */
+    public boolean hasValues(){
+        return !(getLocalizedValues() == null || getLocalizedValues().size() < 1
+                || StringUtility.isEmpty(getLocalizedValues().get(0).getLocalizedValue()));
+    }
+    
     /**
      * Returns compiled string of values for different languages.
      */
