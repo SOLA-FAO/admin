@@ -121,6 +121,7 @@ function handleFieldSaveError(data) {
 var exception_constraint;
 function onOpenEditConstraint(data) {
     onOpenEditRec(data, 'constraint');
+    customizeConstraintForm();
 }
 
 function onSaveConstraint(data) {
@@ -171,4 +172,35 @@ function handleOptionSaveError(data) {
         exception_constraint_option = data.errorMessage;
         alert(data.errorMessage);
     }
+}
+
+function customizeConstraintForm(){
+    var type = $('#mainForm\\:cbxConstraintType').val();
+    $('#mainForm\\:txtConstraintFormat').prop('disabled', false);
+    $('#mainForm\\:txtConstraintMinValue').prop('disabled', false);
+    $('#mainForm\\:txtConstraintMaxValue').prop('disabled', false);
+    
+    if(type === '')
+        return;
+    
+    if(type === 'DOUBLE_RANGE' || type === 'INTEGER_RANGE' || type === 'LENGTH'){
+        $('#mainForm\\:txtConstraintFormat').prop('disabled', true);
+        $('#mainForm\\:txtConstraintFormat').val('');
+        return;
+    }
+    
+    if(type === 'REGEXP'){
+        $('#mainForm\\:txtConstraintMinValue').prop('disabled', true);
+        $('#mainForm\\:txtConstraintMaxValue').prop('disabled', true);
+        $('#mainForm\\:txtConstraintMinValue').val('');
+        $('#mainForm\\:txtConstraintMaxValue').val('');
+        return;
+    }
+    
+    $('#mainForm\\:txtConstraintFormat').prop('disabled', true);
+    $('#mainForm\\:txtConstraintMinValue').prop('disabled', true);
+    $('#mainForm\\:txtConstraintMaxValue').prop('disabled', true);
+    $('#mainForm\\:txtConstraintMinValue').val('');
+    $('#mainForm\\:txtConstraintMaxValue').val('');
+    $('#mainForm\\:txtConstraintFormat').val('');
 }

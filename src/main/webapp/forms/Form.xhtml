@@ -753,6 +753,7 @@
                                                         <h:selectOneListbox
                                                             id="cbxConstraintType" 
                                                             size="1"
+                                                            onchange="customizeConstraintForm();"
                                                             value="#{formsPageBean.tmpConstraint.fieldConstraintType}"
                                                             class="form-control">
                                                             <f:selectItems value="#{formsPageBean.constraintTypes}" var="ct"
