@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.fao.sola.admin.web</groupId>
     <artifactId>sola-web-admin</artifactId>
-    <version>1411a-SNAPSHOT</version>
+    <version>1504a-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>SOLA Web Admin</name>
@@ -33,7 +33,7 @@
     
     <properties>
         <sola.services.group.id>org.sola.services</sola.services.group.id>
-        <sola.version>1402a-SNAPSHOT</sola.version>
+        <sola.version>1503a</sola.version>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>org.sola.opentenure.services.ejbs</groupId>
             <artifactId>sola-opentenure-claim</artifactId>
-            <version>1403a-SNAPSHOT</version>
+            <version>1504a-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>servlet-api</artifactId>
