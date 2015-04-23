@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.fao.sola.admin.web</groupId>
     <artifactId>sola-web-admin</artifactId>
-    <version>1411a-SNAPSHOT</version>
+    <version>1504a-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>SOLA Web Admin</name>
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>org.sola.opentenure.services.ejbs</groupId>
             <artifactId>sola-opentenure-claim</artifactId>
-            <version>1403a-SNAPSHOT</version>
+            <version>1504a-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>servlet-api</artifactId>
