@@ -17,12 +17,12 @@ import org.fao.sola.admin.web.beans.language.LanguageBean;
 import org.fao.sola.admin.web.beans.localization.LocalizedValuesListBean;
 import org.sola.common.StringUtility;
 import org.sola.common.mapping.MappingManager;
-import org.sola.opentenure.services.ejbs.claim.businesslogic.ClaimEJBLocal;
-import org.sola.opentenure.services.ejbs.claim.entities.FieldConstraint;
-import org.sola.opentenure.services.ejbs.claim.entities.FieldConstraintOption;
-import org.sola.opentenure.services.ejbs.claim.entities.FieldTemplate;
-import org.sola.opentenure.services.ejbs.claim.entities.FormTemplate;
-import org.sola.opentenure.services.ejbs.claim.entities.SectionTemplate;
+import org.sola.cs.services.ejbs.claim.businesslogic.ClaimEJBLocal;
+import org.sola.cs.services.ejbs.claim.entities.FieldConstraint;
+import org.sola.cs.services.ejbs.claim.entities.FieldConstraintOption;
+import org.sola.cs.services.ejbs.claim.entities.FieldTemplate;
+import org.sola.cs.services.ejbs.claim.entities.FormTemplate;
+import org.sola.cs.services.ejbs.claim.entities.SectionTemplate;
 import org.sola.services.common.EntityAction;
 import org.sola.services.common.logging.LogUtility;
 import org.sola.services.ejb.refdata.businesslogic.RefDataEJBLocal;
@@ -634,7 +634,7 @@ public class FormsPageBean extends AbstractBackingBean {
             runUpdate(new Runnable() {
                 @Override
                 public void run() {
-                    formTemplate = claimEjb.saveFormTemplate(formTemplate);
+                    formTemplate = claimEjb.saveEntity(formTemplate);
                 }
             });
 

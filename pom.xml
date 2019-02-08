@@ -46,10 +46,20 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>${sola.services.group.id}</groupId>
-            <artifactId>sola-services-common</artifactId>
-            <version>${sola.version}</version>
+            <groupId>org.sola.cs.common</groupId>
+            <artifactId>sola-cs-common</artifactId>
+            <version>1712a</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org.sola.common</artifactId>
+                    <groupId>sola-common</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${sola.services.group.id}.ejbs</groupId>
@@ -60,6 +70,10 @@
                 <exclusion>
                     <artifactId>servlet-api</artifactId>
                     <groupId>javax.servlet</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org.sola.common</artifactId>
+                    <groupId>sola-common</groupId>
                 </exclusion>
             </exclusions>
             <type>ejb</type>
@@ -74,17 +88,25 @@
                     <artifactId>servlet-api</artifactId>
                     <groupId>javax.servlet</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>org.sola.common</artifactId>
+                    <groupId>sola-common</groupId>
+                </exclusion>
             </exclusions>
             <type>ejb</type>
         </dependency>
         <dependency>
-            <groupId>org.sola.opentenure.services.ejbs</groupId>
-            <artifactId>sola-opentenure-claim</artifactId>
-            <version>1504a-SNAPSHOT</version>
+            <groupId>org.sola.cs.services.ejbs</groupId>
+            <artifactId>sola-cs-claim</artifactId>
+            <version>1712a</version>
             <exclusions>
                 <exclusion>
                     <artifactId>servlet-api</artifactId>
                     <groupId>javax.servlet</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org.sola.common</artifactId>
+                    <groupId>sola-common</groupId>
                 </exclusion>
             </exclusions>
             <type>ejb</type>
@@ -100,6 +122,10 @@
                     <artifactId>servlet-api</artifactId>
                     <groupId>javax.servlet</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>org.sola.common</artifactId>
+                    <groupId>sola-common</groupId>
+                </exclusion>
             </exclusions>
             <type>ejb</type>
         </dependency>
@@ -112,6 +138,10 @@
                 <exclusion>
                     <artifactId>servlet-api</artifactId>
                     <groupId>javax.servlet</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org.sola.common</artifactId>
+                    <groupId>sola-common</groupId>
                 </exclusion>
             </exclusions>
             <type>ejb</type>

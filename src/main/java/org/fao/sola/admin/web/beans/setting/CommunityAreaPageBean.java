@@ -13,6 +13,8 @@ import org.fao.sola.admin.web.beans.helpers.MessageProvider;
 import org.fao.sola.admin.web.beans.helpers.MessagesKeys;
 import org.fao.sola.admin.web.beans.language.LanguageBean;
 import org.sola.common.ConfigConstants;
+
+
 import org.sola.common.StringUtility;
 import org.sola.services.ejb.search.businesslogic.SearchEJBLocal;
 import org.sola.services.ejb.search.repository.entities.ConfigMapLayer;
